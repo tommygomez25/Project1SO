@@ -1,3 +1,0 @@
-/home/tommygomez25/CLionProjects/SOProject1/cmake-build-debug/CMakeFiles/SOProject1.dir
-/home/tommygomez25/CLionProjects/SOProject1/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/tommygomez25/CLionProjects/SOProject1/cmake-build-debug/CMakeFiles/rebuild_cache.dir
