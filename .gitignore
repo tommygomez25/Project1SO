@@ -1,6 +1,6 @@
 # http://www.gnu.org/software/automake
 
-CMakeLists.txt
+
 cmake-build-debug
 .idea
 Makefile.in
