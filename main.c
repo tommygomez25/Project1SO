@@ -1,88 +1,55 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdbool.h>
 
-#define BUF_SIZE 5
 void print_usage(const char *exe) {
     printf("Usage: %s [-l] <filename>\n", exe);
 }
 
-int phrases_count(const char *fname){
+int phrases(const char*fname, bool mode){
+
     unsigned int count = 0;
-
-    char buf[BUF_SIZE];
-
-    FILE *f = fopen(fname,"r");
-    if ( f == NULL){
-        return -1;
-    }
-
+    unsigned int index = 1;
+    char c;
     char last = ' ';
-    while (!feof(f)) {
-        size_t c = fread(buf, sizeof(char), BUF_SIZE - 1, f);
-        buf[c] = '\0';
-        int i = 0;
-        for (i = 0; buf[i]; ++i) {
-            if (buf[i] == '.' || buf[i] == '?' || buf[i] == '!') {
-                count++;
-                last = ' ';
-            } else if (buf[i] == ' ' || buf[i] == '\t' || buf[i] == '\n') {
-                continue; //white-space doesn't include to sentence of top.
-            } else {
-                last = buf[i]; //check for Not terminated with ".?!"
-            }
-        }
-    }
-    fclose(f);
-    return count += (last != ' '); // +1 if Not terminated with ".?!"
-}
-
-int phrases(const char*fname){
-
-    unsigned int count = 1;
-    char buf[BUF_SIZE];
 
     FILE *f = fopen(fname,"r");
     if ( f == NULL){
+        perror("Error in opening file");
         return -1;
     }
-
-    unsigned z = 1;
-    while (!feof(f)) {
-        size_t c = fread(buf, sizeof(char), BUF_SIZE - 1, f);
-        /*
-        if ( z == 1){
-            printf("[1]");
+    if (mode && (c = fgetc(f)) != EOF){
+        printf("[%d]%c",index,c);
+    }
+    do {
+        c = fgetc(f);
+        if (feof(f)){
+            break;
         }
-        z++;
-         */
-        buf[c] = '\0';
-        for (int i = 0; buf[i];i++){
-            printf("%c",buf[i]);
-
-        }
-        printf("\n");
-        /*
-        buf[c] = '\0';
-        int i = 0;
-        for (i = 0; buf[i]; ++i) {
-            if (buf[i] == '.' || buf[i] == '?' || buf[i] == '!') {
-                count++;
-            } else if (buf[i] == ' ' || buf[i] == '\t' || buf[i] == '\n') {
-                continue; //white-space doesn't include to sentence of top.
-            } else {
-                if (buf[i-1] == '.' || buf[i-1] == '?' || buf[i-1] == '!') {
-                    printf("\n[%d]",count);
-                }
-                printf("%c", buf[i]);
+        if ( c == '.' || c == '?' || c == '!'){
+            index++;
+            if (mode){
+                printf("\n[%d]",index);
             }
+            count++;
+            last = ' ';
         }
-         */
+
+        else {
+            if (mode){
+                printf("%c",c);
+            }
+            last = c;
+        }
+    } while (1);
+
+    if (mode){
+        printf("\n");
     }
 
-    printf("\n");
     fclose(f);
-    return 0;
+    return count + (last != ' ');
 }
 
 
@@ -94,8 +61,10 @@ int main(int argc, char const *argv[]) {
         return -1;
     }
 
-    // default operating mode is not changing the string
-    //output_mode_t m = ORIGINAL;
+    else if (argc == 2) {
+        printf("%d\n",phrases(argv[1],false));
+        return 0;
+    }
 
     // handle third optional argument
     if (argc == 3) {
@@ -104,14 +73,9 @@ int main(int argc, char const *argv[]) {
             return -1;
         }
         else {
-            phrases(argv[2]);
+            phrases(argv[2],true);
             return 0;
         }
-    }
-
-    else if (argc == 2) {
-        printf("%d\n",phrases_count(argv[1]));
-        return 0;
     }
 
 }
