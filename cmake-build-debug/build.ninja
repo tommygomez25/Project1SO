@@ -55,6 +55,12 @@ build CMakeFiles/SOProject1.dir/main.c.o: C_COMPILER__SOProject1_Debug /home/tom
   OBJECT_DIR = CMakeFiles/SOProject1.dir
   OBJECT_FILE_DIR = CMakeFiles/SOProject1.dir
 
+build CMakeFiles/SOProject1.dir/addmx.c.o: C_COMPILER__SOProject1_Debug /home/tommygomez25/CLionProjects/SOProject1/addmx.c || cmake_object_order_depends_target_SOProject1
+  DEP_FILE = CMakeFiles/SOProject1.dir/addmx.c.o.d
+  FLAGS = -g -std=gnu99
+  OBJECT_DIR = CMakeFiles/SOProject1.dir
+  OBJECT_FILE_DIR = CMakeFiles/SOProject1.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target SOProject1
@@ -63,7 +69,7 @@ build CMakeFiles/SOProject1.dir/main.c.o: C_COMPILER__SOProject1_Debug /home/tom
 #############################################
 # Link the executable SOProject1
 
-build SOProject1: C_EXECUTABLE_LINKER__SOProject1_Debug CMakeFiles/SOProject1.dir/main.c.o
+build SOProject1: C_EXECUTABLE_LINKER__SOProject1_Debug CMakeFiles/SOProject1.dir/main.c.o CMakeFiles/SOProject1.dir/addmx.c.o
   FLAGS = -g
   OBJECT_DIR = CMakeFiles/SOProject1.dir
   POST_BUILD = :
