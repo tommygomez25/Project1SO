@@ -17,39 +17,54 @@ void print_usage(const char *exe) {
 
 int addmx(const char *file1, const char *file2){
 
-    int f1 = open(file1,O_RDONLY,S_IRUSR |S_IWUSR);
+    FILE *f1 = fopen(file1,"r");
+
     if (f1 == NULL){
         perror("Error in opening file 1");
         return -1;
     }
-    int f2 = open (file2, O_RDONLY,S_IRUSR |S_IWUSR);
+
+    FILE *f2 = fopen (file2, "r");
+
     if (f2 == NULL){
         perror("Error in opening file 2");
         return -1;
     }
 
     struct stat sb;
-    if (fstat(f1,&sb) == -1){
+    if (fstat(fileno(f1),&sb) == -1){
         perror("Couldn't get file size.\n");
     }
     printf("The file size is %ld\n",sb.st_size);
 
     struct stat sb2;
-    if (fstat(f1,&sb2) == -1){
+    if (fstat(fileno(f2),&sb2) == -1){
         perror("Couldn't get file size.\n");
     }
     printf("The file size is %ld\n",sb2.st_size);
 
-    char *file_in_memory = mmap(NULL,sb.st_size ,PROT_READ ,MAP_SHARED,f1,0);
-    char *file_in_memory2 = mmap(file_in_memory,sb2.st_size*2,PROT_READ,MAP_SHARED,f2,0);
-    char *file_in_memory3 = mmap(file_in_memory2,sb.st_size * 2,PROT_WRITE,MAP_SHARED,STDOUT_FILENO,0);
+    char *file_in_memory = mmap(NULL,sb.st_size ,PROT_READ ,MAP_SHARED,fileno(f1),0);
+    char *file_in_memory2 = mmap(file_in_memory,sb2.st_size,PROT_READ,MAP_SHARED,fileno(f2),0);
+    char *file_in_memory3 = mmap(file_in_memory2,sb.st_size ,PROT_WRITE,MAP_SHARED,0,0);
 
     for (int i = 0; i < sb.st_size;i++){
         printf("%c",file_in_memory[i]);
     }
+    printf("\n");
     for (int i = 0; i < sb2.st_size;i++){
         printf("%c",file_in_memory2[i]);
     }
+
+    int counter = 1;
+    char ch1;
+    do {
+        ch1 = fgetc(f1);
+        if (ch1 == '\n'){
+            break;
+        }
+        else counter++;
+    } while(1);
+
     unsigned int row = atoi(&file_in_memory[0]) ;
     unsigned int col = atoi(&file_in_memory[2]) ;
     //file_in_memory3[0] = row + '0'; file_in_memory3[1] = 'x'; file_in_memory3[2] = col + '0';
@@ -65,7 +80,8 @@ int addmx(const char *file1, const char *file2){
             //child process
 
             for (int j = 1; j <= row;j++){
-                int new_col = atoi(&file_in_memory[4 + (j-1)*(col*2) + ((i-1)*2)] )+ atoi(&file_in_memory2[4 + (j-1)*(col*2) + ((i-1)*2)]);_
+                int new_col = atoi(&file_in_memory[counter + (j-1)*(col*2) + ((i-1)*2)] )+ atoi(&file_in_memory2[counter + (j-1)*(col*2) + ((i-1)*2)]);
+                file_in_memory3[counter+ (j-1)*(col*2) + ((i-1)*2)] = new_col + '0';
                 printf("%d\n",new_col);
             }
 
@@ -78,6 +94,9 @@ int addmx(const char *file1, const char *file2){
         }
     }
 
+    for ( int i = 0; i < sb.st_size;i++){
+        printf("%c",file_in_memory3[i]);
+    }
     munmap(file_in_memory,sb.st_size);
     munmap(file_in_memory2,sb2.st_size);
     close(f1);
