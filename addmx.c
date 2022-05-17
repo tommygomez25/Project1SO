@@ -43,32 +43,44 @@ int addmx(const char *file1, const char *file2){
     }
     printf("The file size is %ld\n",sb2.st_size);
 
-    char *file_in_memory = mmap(NULL,sb.st_size ,PROT_READ ,MAP_SHARED,fileno(f1),0);
-    char *file_in_memory2 = mmap(file_in_memory,sb2.st_size,PROT_READ,MAP_SHARED,fileno(f2),0);
-    char *file_in_memory3 = mmap(file_in_memory2,sb.st_size ,PROT_WRITE,MAP_SHARED,0,0);
+    char ch;
+    unsigned row,col;
+    size_t len = 0;
+    char *line = NULL;
+    getline(&line,&len,f1);
+    sscanf(line,"%d%c%d",&row,&ch,&col); // vai buscar a primeira linha para saber quantas linhas e colunas tem a matriz
+    printf("row : %d\n",row);
+    printf("col : %d\n",col);
 
-    for (int i = 0; i < sb.st_size;i++){
-        printf("%c",file_in_memory[i]);
+    int * map =(int *) mmap(NULL,row*col,PROT_READ | PROT_WRITE,MAP_SHARED | MAP_ANONYMOUS,-1,0);
+    // MAP_ANONYMOUS faz com que o argumento fd seja ignorado, ou seja, ele não vai buscar file nenhum para mapear, simplesmente aloca memória onde os blocos ficam empty
+    int * map2 = (int *) mmap(map,row*col,PROT_READ | PROT_WRITE,MAP_SHARED|MAP_ANONYMOUS,-1,0);
+
+    int index = 0;
+    int num;
+    while (fscanf(f1,"%d",&num) != EOF){
+        map[index] = num;
+        index++;
     }
-    printf("\n");
-    for (int i = 0; i < sb2.st_size;i++){
-        printf("%c",file_in_memory2[i]);
+
+    for (int i = 0; i < row*col;i++){
+        printf("%d\n",map[i]);
     }
 
-    int counter = 1;
-    char ch1;
-    do {
-        ch1 = fgetc(f1);
-        if (ch1 == '\n'){
-            break;
-        }
-        else counter++;
-    } while(1);
-
-    unsigned int row = atoi(&file_in_memory[0]) ;
-    unsigned int col = atoi(&file_in_memory[2]) ;
-    //file_in_memory3[0] = row + '0'; file_in_memory3[1] = 'x'; file_in_memory3[2] = col + '0';
-
+    int counter = 0;
+    getline(&line,&len,f2); // para ignorar a primeira linha do segundo ficheiro
+    index = 0;
+    while (fscanf(f2,"%d",&num) != EOF){
+        printf("%d",num);
+        map2[index] = num;
+        index++;
+    }
+    /*
+    for (int i = 0; i < row*col;i++){
+        printf("%d\n",map2[i]);
+    }
+    */
+    /*
     pid_t pid_matrix[col];
 
     for (size_t i = 1; i <= col;i++) {
@@ -99,8 +111,9 @@ int addmx(const char *file1, const char *file2){
     }
     munmap(file_in_memory,sb.st_size);
     munmap(file_in_memory2,sb2.st_size);
-    close(f1);
-    close(f2);
+     */
+    close(fileno(f1));
+    close(fileno(f2));
     return 0;
 }
 
